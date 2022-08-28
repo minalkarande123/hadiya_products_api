@@ -6,10 +6,10 @@ phases:
       nodejs: 16
     commands:
       - npm install
-  artifacts:
-    files:
-      - '**/*'
-    name: products-api-$(date +%Y-%m-%d)
-  cache:
-    paths:
-      - '~/.npm'
+artifacts:
+  files:
+    - '**/*'
+  name: products-api-$(date +%Y-%m-%d)
+cache:
+  paths:
+    - '~/.npm'
