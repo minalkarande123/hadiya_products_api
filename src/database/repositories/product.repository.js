@@ -13,7 +13,8 @@ export class ProductRepository {
             // handle
             throw new API400Error(`Request missing product data!`)
         }
-        productData.id = v4();
+        console.log(productData);
+        productData.uuid = v4();
         // await sequelize.Product.create(productData)
         await Product.create(productData);
     }
@@ -43,7 +44,7 @@ export class ProductRepository {
             // handle error invalid id
             throw new API400Error('Invalid product ID!');
         }
-        const product = await Product.findByPk(id);
+        const product = await Product.findOne({ uuid: id });
         if(!product){
             throw new API404Error(`Product with id ${id} not found!`);
         }
@@ -60,7 +61,7 @@ export class ProductRepository {
         }
         await Product.update(
             { name: productData.name, price: productData.price, currency: productData.currency, imageURL: productData.imageURL },
-            { where: { id: productData.id } }
+            { where: { uuid: productData.id } }
         );
     }
 
@@ -72,6 +73,6 @@ export class ProductRepository {
             // handle error invalid id
             throw new API400Error('Invalid product ID!');
         }
-        await Product.destroy({ where: { id: id } });
+        await Product.destroy({ where: { uuid: id } });
     }
 }
