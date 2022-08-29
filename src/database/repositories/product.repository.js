@@ -1,7 +1,12 @@
 import { v4, validate, version } from 'uuid';
 import { API400Error, API404Error } from '../../utils/errors/index.js';
-import { Product } from '../models/product.js';
-
+// const Product = require('./database/models').sequelize;
+import pkg from '../models/index.cjs';
+const { sequelize } = pkg;
+// const Product = sequelize;
+// console.log(Product);
+console.log(sequelize.models["Product"]);
+const Product = sequelize.models["Product"];
 export class ProductRepository {
     async insertProduct (productData) {
         if(!productData){
@@ -9,6 +14,7 @@ export class ProductRepository {
             throw new API400Error(`Request missing product data!`)
         }
         productData.id = v4();
+        // await sequelize.Product.create(productData)
         await Product.create(productData);
     }
       

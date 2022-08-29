@@ -14,15 +14,12 @@ async function StartServer() {
 
     const port = PORT || 3000;
 
-    await sequelize.sync({
-      force: false,
-      alter: false
-    });
-
     expressApp(app, producer);
 
-    app.listen(port, () => {
+    app.listen(port, async () => {
       console.log(`Server is listening on ${port}`);
+      await sequelize.authenticate();
+      console.log('Database connected!');
     })
   }
   catch(err) {
