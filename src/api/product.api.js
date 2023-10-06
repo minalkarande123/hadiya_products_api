@@ -51,7 +51,7 @@ export async function ProductAPI (app) {
                     pagination.offset = +req.query.offset
                 }
                 const products = await productService.GetProducts(pagination);
-                const info = `${new Date()} Request id: ${req.id}. GET /products ${SuccessCode.OK} Products fetched successfully`;
+		const info = `${new Date()} Request id: ${req.id}. GET /products ${SuccessCode.OK} Products fetched successfully`;
                 res.status(SuccessCode.OK).json({
                     message: "Success",
                     data: products
