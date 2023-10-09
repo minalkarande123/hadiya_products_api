@@ -37,7 +37,7 @@ export class ProductRepository {
             // handle error invalid id
             throw new API400Error('Invalid product ID!');
         }
-        const product = await Product.findOne({ uuid: id });
+        const product = await Product.findOne({where: { uuid: id }});
         if(!product){
             throw new API404Error(`Product with id ${id} not found!`);
         }
