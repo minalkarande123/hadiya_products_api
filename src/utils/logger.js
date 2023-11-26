@@ -1,53 +1,55 @@
 import { createLogger, transports, format } from 'winston';
+import ecsFormat from '@elastic/ecs-winston-format'
+import 'winston-daily-rotate-file';
 import { AppError } from './errors/app.error.js';
 import { Formatter } from './formatter.js';
 
+const dailyRotateTransport = new transports.DailyRotateFile({
+    filename: 'products-api-logs-%DATE%.log',
+    datePattern: 'DD-MM-YYYY',
+    zippedArchive: true,
+    dirname: 'logs'
+  });
+
 export const Logger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.json()
-    ),
-    defaultMeta: { service: 'product' },
+    level: 'debug',
+    format: ecsFormat({ convertReqRes: true }),
     transports: [
+        dailyRotateTransport,
         new transports.Console()
     ]
 })
 
 export class InfoLogger {
-    static async log(message) {
-        Logger.log({
-            level: 'info',
-            message: {
-                timestamp: Formatter.formatDate2Timestamp(new Date()),
-                message: message
-            }
-        });
+    static log(message) {
+        Logger.log(
+            'info',
+            message,
+            { env:process.env.NODE_ENV }
+        );
     }
 }
 
 export class HttpLogger{
-    static async log(req) {
-        Logger.log({
-            level: 'info',
-            request: 'asdf'
-        })
+    static log(message, {req, res}) {
+        Logger.log('info', message, { req, res, env:process.env.NODE_ENV })
     }
 }
 
 export class ErrorLogger{
     constructor(){}
 
-    async error(err){
+    static log(err){
         console.log("=================START ERROR LOGGER=================");
-        Logger.log({
-            level: 'error',
-            message: {
+        Logger.log(
+            'error',
+            {
                 timestamp: new Date(),
-                message: JSON.stringify(err),
+                error: JSON.stringify(err),
                 trace: JSON.stringify(err.stack)
             },
                 
-        });
+        );
         console.log("=================END ERROR LOGGER=================");
         return false;
     }

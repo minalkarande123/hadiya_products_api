@@ -1,14 +1,14 @@
 import { ProductService } from '../services/index.js';
-import { InfoLogger } from '../utils/logger.js';
+import { Logger, HttpLogger } from '../utils/logger.js';
 
 const SuccessCode = {
     'OK': 200,
     'CREATED': 201
 }
 
-export async function ProductAPI (app, producer) {
+export async function ProductAPI (app) {
 
-    const productService = new ProductService(producer);
+    const productService = new ProductService();
 
     app.post('/products', async (req, res, next) => {
         try{
@@ -20,10 +20,10 @@ export async function ProductAPI (app, producer) {
             }
             await productService.AddProduct(productData);
             const info = `${new Date()} Request id: ${req.id}. POST /products ${SuccessCode.CREATED} Product added successfully`;
-            await InfoLogger.log(info);
             res.status(SuccessCode.CREATED).send({
                 message: "Product added successfully"
             })
+            Logger.info(info);
         }
         catch(err) {
             // handle
@@ -38,11 +38,11 @@ export async function ProductAPI (app, producer) {
             if(req.query.id){
                 const product = await productService.GetProductById(req.query.id);
                 const info = `${new Date()} Request id: ${req.id}. GET /products ${SuccessCode.OK} Product with id ${req.query.id} fetched successfully`;
-                await InfoLogger.log(info);
                 res.status(SuccessCode.OK).json({
                     message: "Success",
                     data: product
                 });
+                Logger.info(info);
             }
             else{
                 let pagination = {};
@@ -51,12 +51,13 @@ export async function ProductAPI (app, producer) {
                     pagination.offset = +req.query.offset
                 }
                 const products = await productService.GetProducts(pagination);
-                const info = `${new Date()} Request id: ${req.id}. GET /products ${SuccessCode.OK} Products fetched successfully`;
-                InfoLogger.log(info);
+		const info = `${new Date()} Request id: ${req.id}. GET /products ${SuccessCode.OK} Products fetched successfully`;
                 res.status(SuccessCode.OK).json({
                     message: "Success",
                     data: products
                 })
+                // Logger.info(info)
+                HttpLogger.log(info, { req, res })
             }
         }
         catch(err){
@@ -75,10 +76,10 @@ export async function ProductAPI (app, producer) {
             }
             await productService.UpdateProduct(data);
             const info = `${new Date()} Request id: ${req.id}. PUT /products ${SuccessCode.OK} Product with id ${req.query.id} updated successfully`;
-            await InfoLogger.log(info);
             res.status(SuccessCode.OK).json({
                 message: "Record updated successfully"
             });
+            Logger.info(info);
         }
         catch(err){
             next(err);
@@ -89,33 +90,14 @@ export async function ProductAPI (app, producer) {
         try{
             await productService.DeleteProduct(req.query.id);
             const info = `${new Date()} Request id: ${req.id}. DEL /products ${SuccessCode.OK} Product with id ${req.query.id} deleted successfully`;
-            await InfoLogger.log(info);
             res.status(SuccessCode.OK).json({
                 message: "Record deleted successfully"
             })
+            Logger.info(info);
         }
         catch(err){
             next(err);
         }
-    })
-
-    app.post('/products/add_to_cart', async (req, res, next) => {
-        try{
-            const payload = {
-                productId: req.body.productId,
-                cartId: req.body.cartId,
-                quantity: req.body.quantity
-            }
-            await productService.AddToCart(payload);
-            const info = `${new Date()} Request id: ${req.id}. POST /products/add_to_cart ${SuccessCode.OK} Product payload sent to queue successfully`;
-            await InfoLogger.log(info);
-            res.status(SuccessCode.OK).json(payload);
-        }
-        catch(err) {
-            // handle
-            next(err);
-        }
-
     })
 
 }

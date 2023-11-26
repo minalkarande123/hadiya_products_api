@@ -4,7 +4,7 @@ import requestId from 'express-request-id';
 import { ProductAPI } from './api/index.js'
 import { LogHandler, ErrorHandler } from './middlewares/index.js';
 
-export function expressApp(app, producer) {
+export function expressApp(app) {
 
   app.use(requestId());
   app.use(cors())
@@ -16,7 +16,7 @@ export function expressApp(app, producer) {
     });
   });
 
-  ProductAPI(app, producer);
+  ProductAPI(app);
 
   app.use(LogHandler);
   app.use(ErrorHandler);

@@ -1,11 +1,7 @@
 import { v4, validate, version } from 'uuid';
 import { API400Error, API404Error } from '../../utils/errors/index.js';
-// const Product = require('./database/models').sequelize;
 import pkg from '../models/index.cjs';
 const { sequelize } = pkg;
-// const Product = sequelize;
-// console.log(Product);
-console.log(sequelize.models["Product"]);
 const Product = sequelize.models["Product"];
 export class ProductRepository {
     async insertProduct (productData) {
@@ -13,7 +9,6 @@ export class ProductRepository {
             // handle
             throw new API400Error(`Request missing product data!`)
         }
-        console.log(productData);
         productData.uuid = v4();
         // await sequelize.Product.create(productData)
         await Product.create(productData);
@@ -23,8 +18,6 @@ export class ProductRepository {
         const limit = pagination.limit ? pagination.limit : 10;
         const offset = pagination.offset ? pagination.offset : 0;
         const count = await Product.count();
-        console.log(limit);
-        console.log(offset);
         const products = await Product.findAll({ offset: offset, limit: limit, order: [['updatedAt','DESC']] });
         if(!products || products.length === 0){
             throw new API404Error('Products not found!');
@@ -44,7 +37,7 @@ export class ProductRepository {
             // handle error invalid id
             throw new API400Error('Invalid product ID!');
         }
-        const product = await Product.findOne({ uuid: id });
+        const product = await Product.findOne({where: { uuid: id }});
         if(!product){
             throw new API404Error(`Product with id ${id} not found!`);
         }
